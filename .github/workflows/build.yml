@@ -13,7 +13,7 @@ jobs:
       - name: Récupérer le code
         uses: actions/checkout@v4
 
-      - name: Configurer Java (Requis pour Android)
+      - name: Configurer Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
@@ -22,7 +22,6 @@ jobs:
       - name: Configurer Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0'
           channel: 'stable'
 
       - name: Installer les dépendances
@@ -31,16 +30,16 @@ jobs:
       - name: Compiler le fichier APK
         run: flutter build apk --release
 
-      - name: Uploader l'APK généré (Artifact)
+      - name: Uploader l'APK généré
         uses: actions/upload-artifact@v4
         with:
           name: ZONA-Android-APK
           path: build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Compiler le fichier AAB (Pour le Google Play Store)
+      - name: Compiler le fichier AAB
         run: flutter build appbundle --release
 
-      - name: Uploader l'AAB généré (Artifact)
+      - name: Uploader l'AAB généré
         uses: actions/upload-artifact@v4
         with:
           name: ZONA-Android-AAB

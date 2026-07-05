@@ -100,7 +100,7 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#050505" # Couleur de fond noir ZONA
-  image: "assets/logo.png"
+  image: "assets/splash.png"
   android_12:
-    image: "assets/logo.png"
-    color: "123456"
+    image: "assets/splash.png"
+    color: "050505"

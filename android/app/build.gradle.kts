@@ -19,11 +19,11 @@ android {
         applicationId = "ma.zona.zona_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdkVersion 34
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
-    }
+        minSdk = 24
+    targetSdk = flutter.targetSdkVersion
+    versionCode = flutterVersionCode.toInteger()
+    versionName = flutterVersionName
+}
 
     buildTypes {
         release {

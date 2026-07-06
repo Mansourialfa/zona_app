@@ -95,12 +95,12 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/logo.png"
-  adaptive_icon_background: "#050505" # Couleur de fond noir ZONA
+  adaptive_icon_background: "#ffffff" # Couleur de fond noir ZONA
   adaptive_icon_foreground: "assets/logo.png"
 
 flutter_native_splash:
-  color: "#050505" # Couleur de fond noir ZONA
+  color: "#ffffff" # Couleur de fond noir ZONA
   image: "assets/splash.png"
   android_12:
     image: "assets/splash.png"
-    color: "050505"
+    color: "ffffff"

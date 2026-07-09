@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-// Import pour définir la couleur de la barre de statut (optionnel)
-import 'package:flutter/services.dart'; 
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 void main() {
-  // Définir la couleur de la barre de statut en haut (noir pour coller à l'UI Zona)
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.black,
     statusBarIconBrightness: Brightness.light,
@@ -43,28 +43,67 @@ class _ZonaWebViewState extends State<ZonaWebView> {
   @override
   void initState() {
     super.initState();
-    controller = WebViewController()
+    
+    // Demander les permissions au lancement
+    requestPermissions();
+
+    // Configuration spécifique pour Android
+    late final PlatformWebViewControllerCreationParams params;
+    if (WebViewPlatform.instance is AndroidWebViewPlatform) {
+      params = AndroidWebViewControllerCreationParams();
+    } else {
+      params = const PlatformWebViewControllerCreationParams();
+    }
+
+    controller = WebViewController.fromPlatformCreationParams(params)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0xFF050505)) // Couleur de fond noir ZONA
+      ..setBackgroundColor(const Color(0xFF050505))
       ..setNavigationDelegate(
         NavigationDelegate(
-          onPageStarted: (String url) {
-            setState(() { isLoading = true; });
-          },
-          onPageFinished: (String url) {
-            setState(() { isLoading = false; });
-          },
+          onPageStarted: (String url) { setState(() { isLoading = true; }); },
+          onPageFinished: (String url) { setState(() { isLoading = false; }); },
           onNavigationRequest: (NavigationRequest request) {
-            // Permet de gérer tous les sous-domaines (go.zona.ma, job.zona.ma, etc.)
-            if (request.url.contains('zona.ma')) {
-              return NavigationDecision.navigate;
+            // Autoriser les liens externes utiles
+            if (request.url.startsWith('tel:') || 
+                request.url.startsWith('mailto:') || 
+                request.url.startsWith('whatsapp:') ||
+                request.url.startsWith('https://www.google.com/maps/')) {
+              return NavigationDecision.navigate; 
             }
-            // Bloque ou ouvre les liens externes dans le navigateur du téléphone
+            if (request.url.contains('zona.ma')) return NavigationDecision.navigate;
             return NavigationDecision.prevent;
           },
         ),
       )
-      ..loadRequest(Uri.parse('https://zona.ma')); // VOTRE URL
+      ..loadRequest(Uri.parse('https://zona.ma'));
+
+    // Autoriser la page web ZONA à utiliser les capteurs du téléphone
+    if (controller.platform is AndroidWebViewController) {
+      final myAndroidController = (controller.platform as AndroidWebViewController);
+      
+      // Accorde automatiquement l'accès Caméra/Micro quand la WebView le demande
+      myAndroidController.setOnPlatformPermissionRequest(
+        (PlatformWebViewPermissionRequest request) {
+          request.grant();
+        },
+      );
+      
+      // Accorde le GPS automatiquement
+      myAndroidController.setGeolocationPermissionsShowPrompt(
+        (String origin) async {
+          return const GeolocationPermissionsResponse(allow: true, retain: true);
+        }
+      );
+    }
+  }
+
+  Future<void> requestPermissions() async {
+    await [
+      Permission.camera,
+      Permission.microphone,
+      Permission.location,
+      Permission.notification,
+    ].request();
   }
 
   @override
@@ -77,9 +116,7 @@ class _ZonaWebViewState extends State<ZonaWebView> {
             WebViewWidget(controller: controller),
             if (isLoading)
               const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFFFFD700), // Spinner couleur Or
-                ),
+                child: CircularProgressIndicator(color: Color(0xFFFFD700)),
               ),
           ],
         ),
